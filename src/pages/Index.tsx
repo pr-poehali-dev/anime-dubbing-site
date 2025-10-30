@@ -294,6 +294,13 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/60 to-background" />
         
         <div className="relative z-10 text-center px-4 animate-fade-in">
+          <div className="flex justify-center mb-6">
+            <img 
+              src="https://cdn.poehali.dev/files/cc9d35eb-66ff-4c0c-a516-63911cb83945.jpg" 
+              alt="BebraDub Logo" 
+              className="w-64 h-64 object-cover rounded-2xl shadow-2xl border-4 border-primary/20"
+            />
+          </div>
           <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
             BebraDub
           </h1>
