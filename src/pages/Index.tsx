@@ -51,6 +51,8 @@ const Index = () => {
     content: '',
     image_url: ''
   });
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
+  const [newsImagePreview, setNewsImagePreview] = useState<string>('');
 
   const API_URL = 'https://functions.poehali.dev/ad1562f4-2b61-41af-a479-3f6f0447adfd';
   const NEWS_API_URL = 'https://functions.poehali.dev/3c6ea050-fc9a-4302-a957-f39e021872ff';
@@ -444,6 +446,11 @@ const Index = () => {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (evt) => {
+                                setThumbnailPreview(evt.target?.result as string);
+                              };
+                              reader.readAsDataURL(file);
                               toast({ title: 'Обложка выбрана', description: file.name });
                             }
                           }}
@@ -469,10 +476,24 @@ const Index = () => {
                       <Input
                         id="thumbnail"
                         value={formData.thumbnail_url}
-                        onChange={(e) => setFormData({...formData, thumbnail_url: e.target.value})}
+                        onChange={(e) => {
+                          setFormData({...formData, thumbnail_url: e.target.value});
+                          if (e.target.value) {
+                            setThumbnailPreview(e.target.value);
+                          }
+                        }}
                         placeholder="Вставьте ссылку на изображение"
                       />
                     </div>
+                    {thumbnailPreview && (
+                      <div className="mt-3">
+                        <img 
+                          src={thumbnailPreview} 
+                          alt="Предпросмотр" 
+                          className="w-full h-48 object-cover rounded-lg border-2 border-border"
+                        />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="description">Описание</Label>
@@ -666,6 +687,11 @@ const Index = () => {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (evt) => {
+                                setNewsImagePreview(evt.target?.result as string);
+                              };
+                              reader.readAsDataURL(file);
                               toast({ title: 'Изображение выбрано', description: file.name });
                             }
                           }}
@@ -691,10 +717,24 @@ const Index = () => {
                       <Input
                         id="news_image"
                         value={newsFormData.image_url}
-                        onChange={(e) => setNewsFormData({...newsFormData, image_url: e.target.value})}
+                        onChange={(e) => {
+                          setNewsFormData({...newsFormData, image_url: e.target.value});
+                          if (e.target.value) {
+                            setNewsImagePreview(e.target.value);
+                          }
+                        }}
                         placeholder="Вставьте ссылку на изображение"
                       />
                     </div>
+                    {newsImagePreview && (
+                      <div className="mt-3">
+                        <img 
+                          src={newsImagePreview} 
+                          alt="Предпросмотр" 
+                          className="w-full h-48 object-cover rounded-lg border-2 border-border"
+                        />
+                      </div>
+                    )}
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? 'Публикация...' : 'Опубликовать'}
