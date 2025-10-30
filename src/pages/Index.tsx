@@ -286,7 +286,7 @@ const Index = () => {
       <div 
         className="relative h-[70vh] flex items-center justify-center overflow-hidden"
         style={{
-          backgroundImage: 'url(https://cdn.poehali.dev/files/4ac92b0c-0e02-4c43-b494-38439bd6b967.jpg)',
+          backgroundImage: 'url(https://cdn.poehali.dev/files/fa99460f-b8c0-4838-b595-ac34ef41a777.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
