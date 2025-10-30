@@ -263,9 +263,10 @@ const Index = () => {
                 onChange={(e) => setAdminPassword(e.target.value)}
                 placeholder="Введите пароль"
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
+                  if (e.key === 'Enter' && adminPassword) {
                     setIsPasswordDialogOpen(false);
                     setIsAuthenticated(true);
+                    setIsDialogOpen(true);
                   }
                 }}
               />
@@ -273,8 +274,17 @@ const Index = () => {
             <Button 
               className="w-full" 
               onClick={() => {
-                setIsPasswordDialogOpen(false);
-                setIsAuthenticated(true);
+                if (adminPassword) {
+                  setIsPasswordDialogOpen(false);
+                  setIsAuthenticated(true);
+                  setIsDialogOpen(true);
+                } else {
+                  toast({
+                    title: 'Ошибка',
+                    description: 'Введите пароль',
+                    variant: 'destructive',
+                  });
+                }
               }}
             >
               Войти
@@ -325,23 +335,23 @@ const Index = () => {
                 Telegram
               </a>
             </Button>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="hover-scale"
+              onClick={() => {
+                if (!adminPassword) {
+                  setIsPasswordDialogOpen(true);
+                } else {
+                  setIsDialogOpen(true);
+                }
+              }}
+            >
+              <Icon name="Upload" className="mr-2" size={20} />
+              Загрузить видео
+            </Button>
+            
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="hover-scale"
-                  onClick={() => {
-                    if (!adminPassword) {
-                      setIsPasswordDialogOpen(true);
-                      return;
-                    }
-                  }}
-                >
-                  <Icon name="Upload" className="mr-2" size={20} />
-                  Загрузить видео
-                </Button>
-              </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                   <DialogTitle>Загрузить новую озвучку</DialogTitle>
