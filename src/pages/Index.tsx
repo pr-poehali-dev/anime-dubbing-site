@@ -266,7 +266,6 @@ const Index = () => {
                   if (e.key === 'Enter' && adminPassword) {
                     setIsPasswordDialogOpen(false);
                     setIsAuthenticated(true);
-                    setIsDialogOpen(true);
                   }
                 }}
               />
@@ -277,7 +276,6 @@ const Index = () => {
                 if (adminPassword) {
                   setIsPasswordDialogOpen(false);
                   setIsAuthenticated(true);
-                  setIsDialogOpen(true);
                 } else {
                   toast({
                     title: 'Ошибка',
@@ -613,13 +611,21 @@ const Index = () => {
               <h2 className="text-4xl font-bold mb-2">Новости</h2>
               <p className="text-muted-foreground">Последние обновления и анонсы</p>
             </div>
+            <Button 
+              className="hover-scale"
+              onClick={() => {
+                if (!adminPassword) {
+                  setIsPasswordDialogOpen(true);
+                } else {
+                  setIsNewsDialogOpen(true);
+                }
+              }}
+            >
+              <Icon name="Plus" className="mr-2" size={20} />
+              Добавить новость
+            </Button>
+            
             <Dialog open={isNewsDialogOpen} onOpenChange={setIsNewsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="hover-scale">
-                  <Icon name="Plus" className="mr-2" size={20} />
-                  Добавить новость
-                </Button>
-              </DialogTrigger>
               <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
                   <DialogTitle>Опубликовать новость</DialogTitle>
