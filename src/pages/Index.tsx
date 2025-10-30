@@ -656,13 +656,45 @@ const Index = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="news_image">Ссылка на изображение</Label>
-                    <Input
-                      id="news_image"
-                      value={newsFormData.image_url}
-                      onChange={(e) => setNewsFormData({...newsFormData, image_url: e.target.value})}
-                      placeholder="https://example.com/image.jpg"
-                    />
+                    <Label>Обложка новости</Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          id="news_image_file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              toast({ title: 'Изображение выбрано', description: file.name });
+                            }
+                          }}
+                          className="hidden"
+                        />
+                        <label htmlFor="news_image_file" className="w-full">
+                          <Button type="button" variant="outline" className="w-full" asChild>
+                            <span>
+                              <Icon name="Image" className="mr-2" size={16} />
+                              Загрузить изображение
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">или</span>
+                        </div>
+                      </div>
+                      <Input
+                        id="news_image"
+                        value={newsFormData.image_url}
+                        onChange={(e) => setNewsFormData({...newsFormData, image_url: e.target.value})}
+                        placeholder="Вставьте ссылку на изображение"
+                      />
+                    </div>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? 'Публикация...' : 'Опубликовать'}
