@@ -300,10 +300,21 @@ const Index = () => {
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Качественная русская озвучка любимых аниме
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-4 justify-center flex-wrap">
             <Button size="lg" className="hover-scale">
               <Icon name="Play" className="mr-2" size={20} />
               Смотреть
+            </Button>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="hover-scale"
+              asChild
+            >
+              <a href="https://t.me/bebradub" target="_blank" rel="noopener noreferrer">
+                <Icon name="Send" className="mr-2" size={20} />
+                Telegram
+              </a>
             </Button>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
