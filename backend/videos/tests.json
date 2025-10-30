@@ -11,13 +11,19 @@
       "method": "POST",
       "path": "/",
       "body": {
-        "title": "Test Anime Episode 2",
+        "title": "Test Anime Episode 3",
         "description": "Test description",
-        "video_url": "https://example.com/video2.mp4",
-        "thumbnail_url": "https://example.com/thumb2.jpg",
-        "episode_number": 2
+        "video_url": "https://example.com/video3.mp4",
+        "thumbnail_url": "https://example.com/thumb3.jpg",
+        "episode_number": 3
       },
       "expectedStatus": 201
+    },
+    {
+      "name": "Delete video",
+      "method": "DELETE",
+      "path": "/?id=999",
+      "expectedStatus": 200
     }
   ]
 }

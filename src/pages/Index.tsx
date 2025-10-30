@@ -47,6 +47,30 @@ const Index = () => {
     }
   };
 
+  const handleDelete = async (videoId: number, videoTitle: string) => {
+    if (!confirm(`Удалить "${videoTitle}"?`)) return;
+
+    try {
+      const response = await fetch(`${API_URL}?id=${videoId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Видео удалено',
+          description: 'Озвучка успешно удалена',
+        });
+        fetchVideos();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось удалить видео',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -237,12 +261,24 @@ const Index = () => {
                       {video.description || 'Смотреть с русской озвучкой'}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-2">
                     <Button variant="outline" className="w-full group" asChild>
                       <a href={video.video_url} target="_blank" rel="noopener noreferrer">
                         <Icon name="ExternalLink" className="mr-2" size={16} />
                         Смотреть
                       </a>
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      className="w-full" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(video.id, video.title);
+                      }}
+                    >
+                      <Icon name="Trash2" className="mr-2" size={16} />
+                      Удалить
                     </Button>
                   </CardContent>
                 </Card>
