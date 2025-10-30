@@ -122,8 +122,31 @@ const Index = () => {
   const uploadFile = async (file: File): Promise<string> => {
     const reader = new FileReader();
     return new Promise((resolve, reject) => {
-      reader.onload = () => {
-        resolve(reader.result as string);
+      reader.onload = async () => {
+        try {
+          const base64Data = reader.result as string;
+          
+          const response = await fetch(UPLOAD_API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              file: base64Data,
+              fileName: file.name,
+              fileType: file.type
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Upload failed');
+          }
+
+          const data = await response.json();
+          resolve(data.url);
+        } catch (error) {
+          reject(error);
+        }
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
@@ -460,18 +483,68 @@ const Index = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="video_url">Ссылка на видео *</Label>
-                    <Input
-                      id="video_url"
-                      type="url"
-                      value={formData.video_url}
-                      onChange={(e) => setFormData({...formData, video_url: e.target.value})}
-                      placeholder="https://www.youtube.com/watch?v=... или https://vk.com/video..."
-                      required
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Загрузите видео на YouTube, VK Video, Rutube или другой видеохостинг и вставьте ссылку
-                    </p>
+                    <Label>Видео *</Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          id="video_file"
+                          accept="video/*,.mov,.MOV"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setIsUploadingVideo(true);
+                              try {
+                                const url = await uploadFile(file);
+                                setFormData({...formData, video_url: url});
+                                toast({ 
+                                  title: 'Видео загружено!', 
+                                  description: 'Файл успешно загружен в облако' 
+                                });
+                              } catch (error) {
+                                toast({ 
+                                  title: 'Ошибка загрузки', 
+                                  description: 'Не удалось загрузить видео',
+                                  variant: 'destructive'
+                                });
+                              } finally {
+                                setIsUploadingVideo(false);
+                              }
+                            }
+                          }}
+                          className="hidden"
+                          disabled={isUploadingVideo}
+                        />
+                        <label htmlFor="video_file" className="w-full">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            className="w-full" 
+                            disabled={isUploadingVideo}
+                            asChild
+                          >
+                            <span>
+                              <Icon name={isUploadingVideo ? "Loader2" : "Upload"} className={`mr-2 ${isUploadingVideo ? 'animate-spin' : ''}`} size={16} />
+                              {isUploadingVideo ? 'Загрузка...' : 'Загрузить файл'}
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">или</span>
+                        </div>
+                      </div>
+                      <Input
+                        id="video_url"
+                        value={formData.video_url}
+                        onChange={(e) => setFormData({...formData, video_url: e.target.value})}
+                        placeholder="Вставьте ссылку на видео"
+                      />
+                    </div>
                   </div>
                   <div>
                     <Label>Обложка</Label>
