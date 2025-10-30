@@ -326,7 +326,7 @@ const Index = () => {
                 <DialogHeader>
                   <DialogTitle>Загрузить новую озвучку</DialogTitle>
                   <DialogDescription>
-                    Добавьте ссылку на видео и информацию о нём
+                    Загрузите видео с компьютера или добавьте ссылку
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -365,23 +365,86 @@ const Index = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="video_url">Ссылка на видео *</Label>
-                    <Input
-                      id="video_url"
-                      value={formData.video_url}
-                      onChange={(e) => setFormData({...formData, video_url: e.target.value})}
-                      placeholder="https://youtube.com/watch?v=..."
-                      required
-                    />
+                    <Label>Видео *</Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          id="video_file"
+                          accept="video/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              toast({ title: 'Файл выбран', description: file.name });
+                            }
+                          }}
+                          className="hidden"
+                        />
+                        <label htmlFor="video_file">
+                          <Button type="button" variant="outline" className="w-full" asChild>
+                            <span>
+                              <Icon name="Upload" className="mr-2" size={16} />
+                              Загрузить файл
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">или</span>
+                        </div>
+                      </div>
+                      <Input
+                        id="video_url"
+                        value={formData.video_url}
+                        onChange={(e) => setFormData({...formData, video_url: e.target.value})}
+                        placeholder="Вставьте ссылку на видео"
+                      />
+                    </div>
                   </div>
                   <div>
-                    <Label htmlFor="thumbnail">Ссылка на обложку</Label>
-                    <Input
-                      id="thumbnail"
-                      value={formData.thumbnail_url}
-                      onChange={(e) => setFormData({...formData, thumbnail_url: e.target.value})}
-                      placeholder="https://example.com/image.jpg"
-                    />
+                    <Label>Обложка</Label>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="file"
+                          id="thumbnail_file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              toast({ title: 'Обложка выбрана', description: file.name });
+                            }
+                          }}
+                          className="hidden"
+                        />
+                        <label htmlFor="thumbnail_file">
+                          <Button type="button" variant="outline" className="w-full" asChild>
+                            <span>
+                              <Icon name="Image" className="mr-2" size={16} />
+                              Загрузить обложку
+                            </span>
+                          </Button>
+                        </label>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                          <span className="bg-background px-2 text-muted-foreground">или</span>
+                        </div>
+                      </div>
+                      <Input
+                        id="thumbnail"
+                        value={formData.thumbnail_url}
+                        onChange={(e) => setFormData({...formData, thumbnail_url: e.target.value})}
+                        placeholder="Вставьте ссылку на изображение"
+                      />
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor="description">Описание</Label>
