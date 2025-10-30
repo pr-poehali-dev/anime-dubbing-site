@@ -103,7 +103,7 @@ const Index = () => {
         
         <div className="relative z-10 text-center px-4 animate-fade-in">
           <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
-            Anime Dubbing
+            BebraDub
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
             Качественная русская озвучка любимых аниме
