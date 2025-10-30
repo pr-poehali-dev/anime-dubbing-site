@@ -1,0 +1,26 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS request for CORS",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "POST upload file",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "file": "base64data",
+        "fileName": "test.mp4",
+        "fileType": "video/mp4"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "url": "string",
+        "filename": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

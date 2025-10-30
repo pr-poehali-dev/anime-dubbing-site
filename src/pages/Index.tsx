@@ -55,9 +55,13 @@ const Index = () => {
   const [newsImagePreview, setNewsImagePreview] = useState<string>('');
   const [selectedVideo, setSelectedVideo] = useState<AnimeVideo | null>(null);
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
+  const [isUploadingNewsImage, setIsUploadingNewsImage] = useState(false);
 
   const API_URL = 'https://functions.poehali.dev/ad1562f4-2b61-41af-a479-3f6f0447adfd';
   const NEWS_API_URL = 'https://functions.poehali.dev/3c6ea050-fc9a-4302-a957-f39e021872ff';
+  const UPLOAD_API_URL = 'https://functions.poehali.dev/42fac570-4fd4-4465-b8fb-56c3504d2a6c';
 
   useEffect(() => {
     fetchVideos();
@@ -115,6 +119,32 @@ const Index = () => {
     }
   };
 
+  const uploadFile = async (file: File): Promise<string> => {
+    const reader = new FileReader();
+    return new Promise((resolve, reject) => {
+      reader.onload = async () => {
+        try {
+          const base64 = reader.result as string;
+          const response = await fetch(UPLOAD_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              file: base64.split(',')[1],
+              fileName: file.name,
+              fileType: file.type
+            })
+          });
+          const data = await response.json();
+          resolve(data.url);
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -155,6 +185,7 @@ const Index = () => {
           episode_number: '',
           anime_series: 'Gachiakuta'
         });
+        setThumbnailPreview('');
         fetchVideos();
       }
     } catch (error) {
@@ -203,6 +234,7 @@ const Index = () => {
           content: '',
           image_url: ''
         });
+        setNewsImagePreview('');
         fetchNews();
       }
     } catch (error) {
@@ -450,19 +482,42 @@ const Index = () => {
                           type="file"
                           id="video_file"
                           accept="video/*"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              toast({ title: 'Файл выбран', description: file.name });
+                              setIsUploadingVideo(true);
+                              try {
+                                const url = await uploadFile(file);
+                                setFormData({...formData, video_url: url});
+                                toast({ 
+                                  title: 'Видео загружено!', 
+                                  description: 'Файл успешно загружен в облако' 
+                                });
+                              } catch (error) {
+                                toast({ 
+                                  title: 'Ошибка загрузки', 
+                                  description: 'Не удалось загрузить видео',
+                                  variant: 'destructive'
+                                });
+                              } finally {
+                                setIsUploadingVideo(false);
+                              }
                             }
                           }}
                           className="hidden"
+                          disabled={isUploadingVideo}
                         />
-                        <label htmlFor="video_file">
-                          <Button type="button" variant="outline" className="w-full" asChild>
+                        <label htmlFor="video_file" className="w-full">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            className="w-full" 
+                            disabled={isUploadingVideo}
+                            asChild
+                          >
                             <span>
-                              <Icon name="Upload" className="mr-2" size={16} />
-                              Загрузить файл
+                              <Icon name={isUploadingVideo ? "Loader2" : "Upload"} className={`mr-2 ${isUploadingVideo ? 'animate-spin' : ''}`} size={16} />
+                              {isUploadingVideo ? 'Загрузка...' : 'Загрузить файл'}
                             </span>
                           </Button>
                         </label>
@@ -491,7 +546,7 @@ const Index = () => {
                           type="file"
                           id="thumbnail_file"
                           accept="image/*"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
                               const reader = new FileReader();
@@ -499,16 +554,40 @@ const Index = () => {
                                 setThumbnailPreview(evt.target?.result as string);
                               };
                               reader.readAsDataURL(file);
-                              toast({ title: 'Обложка выбрана', description: file.name });
+                              
+                              setIsUploadingThumbnail(true);
+                              try {
+                                const url = await uploadFile(file);
+                                setFormData({...formData, thumbnail_url: url});
+                                toast({ 
+                                  title: 'Обложка загружена!', 
+                                  description: 'Изображение успешно загружено' 
+                                });
+                              } catch (error) {
+                                toast({ 
+                                  title: 'Ошибка загрузки', 
+                                  description: 'Не удалось загрузить обложку',
+                                  variant: 'destructive'
+                                });
+                              } finally {
+                                setIsUploadingThumbnail(false);
+                              }
                             }
                           }}
                           className="hidden"
+                          disabled={isUploadingThumbnail}
                         />
-                        <label htmlFor="thumbnail_file">
-                          <Button type="button" variant="outline" className="w-full" asChild>
+                        <label htmlFor="thumbnail_file" className="w-full">
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            className="w-full" 
+                            disabled={isUploadingThumbnail}
+                            asChild
+                          >
                             <span>
-                              <Icon name="Image" className="mr-2" size={16} />
-                              Загрузить обложку
+                              <Icon name={isUploadingThumbnail ? "Loader2" : "Image"} className={`mr-2 ${isUploadingThumbnail ? 'animate-spin' : ''}`} size={16} />
+                              {isUploadingThumbnail ? 'Загрузка...' : 'Загрузить обложку'}
                             </span>
                           </Button>
                         </label>
@@ -742,7 +821,7 @@ const Index = () => {
                           type="file"
                           id="news_image_file"
                           accept="image/*"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
                               const reader = new FileReader();
@@ -750,16 +829,40 @@ const Index = () => {
                                 setNewsImagePreview(evt.target?.result as string);
                               };
                               reader.readAsDataURL(file);
-                              toast({ title: 'Изображение выбрано', description: file.name });
+                              
+                              setIsUploadingNewsImage(true);
+                              try {
+                                const url = await uploadFile(file);
+                                setNewsFormData({...newsFormData, image_url: url});
+                                toast({ 
+                                  title: 'Изображение загружено!', 
+                                  description: 'Файл успешно загружен' 
+                                });
+                              } catch (error) {
+                                toast({ 
+                                  title: 'Ошибка загрузки', 
+                                  description: 'Не удалось загрузить изображение',
+                                  variant: 'destructive'
+                                });
+                              } finally {
+                                setIsUploadingNewsImage(false);
+                              }
                             }
                           }}
                           className="hidden"
+                          disabled={isUploadingNewsImage}
                         />
                         <label htmlFor="news_image_file" className="w-full">
-                          <Button type="button" variant="outline" className="w-full" asChild>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            className="w-full" 
+                            disabled={isUploadingNewsImage}
+                            asChild
+                          >
                             <span>
-                              <Icon name="Image" className="mr-2" size={16} />
-                              Загрузить изображение
+                              <Icon name={isUploadingNewsImage ? "Loader2" : "Image"} className={`mr-2 ${isUploadingNewsImage ? 'animate-spin' : ''}`} size={16} />
+                              {isUploadingNewsImage ? 'Загрузка...' : 'Загрузить изображение'}
                             </span>
                           </Button>
                         </label>
