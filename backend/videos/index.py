@@ -32,7 +32,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("""
                     SELECT id, title, description, video_url, thumbnail_url, 
-                           episode_number, created_at, updated_at
+                           episode_number, anime_series, created_at, updated_at
                     FROM t_p76178691_anime_dubbing_site.anime_videos
                     ORDER BY created_at DESC
                 """)
@@ -55,15 +55,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             video_url = body_data.get('video_url')
             thumbnail_url = body_data.get('thumbnail_url', '')
             episode_number = body_data.get('episode_number')
+            anime_series = body_data.get('anime_series', '')
             
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute("""
                     INSERT INTO t_p76178691_anime_dubbing_site.anime_videos 
-                    (title, description, video_url, thumbnail_url, episode_number)
-                    VALUES (%s, %s, %s, %s, %s)
+                    (title, description, video_url, thumbnail_url, episode_number, anime_series)
+                    VALUES (%s, %s, %s, %s, %s, %s)
                     RETURNING id, title, description, video_url, thumbnail_url, 
-                              episode_number, created_at, updated_at
-                """, (title, description, video_url, thumbnail_url, episode_number))
+                              episode_number, anime_series, created_at, updated_at
+                """, (title, description, video_url, thumbnail_url, episode_number, anime_series))
                 new_video = cur.fetchone()
                 conn.commit()
             

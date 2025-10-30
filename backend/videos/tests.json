@@ -15,7 +15,8 @@
         "description": "Test description",
         "video_url": "https://example.com/video3.mp4",
         "thumbnail_url": "https://example.com/thumb3.jpg",
-        "episode_number": 3
+        "episode_number": 3,
+        "anime_series": "Gachiakuta"
       },
       "expectedStatus": 201
     },

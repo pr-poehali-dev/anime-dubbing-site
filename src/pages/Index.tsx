@@ -15,6 +15,7 @@ interface AnimeVideo {
   video_url: string;
   thumbnail_url: string;
   episode_number: number;
+  anime_series?: string;
   created_at: string;
 }
 
@@ -22,13 +23,15 @@ const Index = () => {
   const [videos, setVideos] = useState<AnimeVideo[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedSeries, setSelectedSeries] = useState<string>('all');
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     video_url: '',
     thumbnail_url: '',
-    episode_number: ''
+    episode_number: '',
+    anime_series: 'Gachiakuta'
   });
 
   const API_URL = 'https://functions.poehali.dev/ad1562f4-2b61-41af-a479-3f6f0447adfd';
@@ -83,7 +86,8 @@ const Index = () => {
         },
         body: JSON.stringify({
           ...formData,
-          episode_number: parseInt(formData.episode_number) || null
+          episode_number: parseInt(formData.episode_number) || null,
+          anime_series: formData.anime_series
         }),
       });
 
@@ -98,7 +102,8 @@ const Index = () => {
           description: '',
           video_url: '',
           thumbnail_url: '',
-          episode_number: ''
+          episode_number: '',
+          anime_series: 'Gachiakuta'
         });
         fetchVideos();
       }
@@ -153,12 +158,26 @@ const Index = () => {
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="title">Название аниме *</Label>
+                    <Label htmlFor="anime_series">Серия аниме *</Label>
+                    <select
+                      id="anime_series"
+                      value={formData.anime_series}
+                      onChange={(e) => setFormData({...formData, anime_series: e.target.value})}
+                      className="w-full px-3 py-2 bg-input border border-border rounded-md text-foreground"
+                      required
+                    >
+                      <option value="Gachiakuta">Гачиакута</option>
+                      <option value="Windbreaker">Ветролом</option>
+                      <option value="Berserk">Берсерк</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="title">Название серии *</Label>
                     <Input
                       id="title"
                       value={formData.title}
                       onChange={(e) => setFormData({...formData, title: e.target.value})}
-                      placeholder="Например: Атака титанов"
+                      placeholder="Например: Начало пути"
                       required
                     />
                   </div>
@@ -213,14 +232,40 @@ const Index = () => {
 
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-4">
             <div>
               <h2 className="text-4xl font-bold mb-2">Наша озвучка</h2>
               <p className="text-muted-foreground">Последние добавленные серии</p>
             </div>
+            <div className="flex gap-2">
+              <Button 
+                variant={selectedSeries === 'all' ? 'default' : 'outline'}
+                onClick={() => setSelectedSeries('all')}
+              >
+                Все
+              </Button>
+              <Button 
+                variant={selectedSeries === 'Gachiakuta' ? 'default' : 'outline'}
+                onClick={() => setSelectedSeries('Gachiakuta')}
+              >
+                Гачиакута
+              </Button>
+              <Button 
+                variant={selectedSeries === 'Windbreaker' ? 'default' : 'outline'}
+                onClick={() => setSelectedSeries('Windbreaker')}
+              >
+                Ветролом
+              </Button>
+              <Button 
+                variant={selectedSeries === 'Berserk' ? 'default' : 'outline'}
+                onClick={() => setSelectedSeries('Berserk')}
+              >
+                Берсерк
+              </Button>
+            </div>
           </div>
 
-          {videos.length === 0 ? (
+          {videos.filter(v => selectedSeries === 'all' || v.anime_series === selectedSeries).length === 0 ? (
             <div className="text-center py-20">
               <Icon name="Video" size={64} className="mx-auto mb-4 text-muted-foreground" />
               <p className="text-xl text-muted-foreground">Пока нет загруженных видео</p>
@@ -228,7 +273,7 @@ const Index = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((video, index) => (
+              {videos.filter(v => selectedSeries === 'all' || v.anime_series === selectedSeries).map((video, index) => (
                 <Card 
                   key={video.id} 
                   className="group overflow-hidden hover-scale cursor-pointer animate-fade-in"
@@ -249,6 +294,13 @@ const Index = () => {
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Icon name="Play" size={48} className="text-white" />
                     </div>
+                    {video.anime_series && (
+                      <div className="absolute top-2 left-2 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                        {video.anime_series === 'Gachiakuta' && '🔥 Гачиакута'}
+                        {video.anime_series === 'Windbreaker' && '💨 Ветролом'}
+                        {video.anime_series === 'Berserk' && '⚔️ Берсерк'}
+                      </div>
+                    )}
                     {video.episode_number && (
                       <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm font-semibold">
                         Серия {video.episode_number}
