@@ -53,6 +53,8 @@ const Index = () => {
   });
   const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
   const [newsImagePreview, setNewsImagePreview] = useState<string>('');
+  const [selectedVideo, setSelectedVideo] = useState<AnimeVideo | null>(null);
+  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
 
   const API_URL = 'https://functions.poehali.dev/ad1562f4-2b61-41af-a479-3f6f0447adfd';
   const NEWS_API_URL = 'https://functions.poehali.dev/3c6ea050-fc9a-4302-a957-f39e021872ff';
@@ -247,6 +249,52 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Dialog open={isPlayerOpen} onOpenChange={setIsPlayerOpen}>
+        <DialogContent className="sm:max-w-[90vw] max-h-[90vh] p-0">
+          {selectedVideo && (
+            <div className="flex flex-col h-full">
+              <div className="aspect-video w-full bg-black">
+                {selectedVideo.video_url.includes('youtube.com') || selectedVideo.video_url.includes('youtu.be') ? (
+                  <iframe
+                    src={selectedVideo.video_url.replace('watch?v=', 'embed/')}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    src={selectedVideo.video_url}
+                    className="w-full h-full"
+                    controls
+                    autoPlay
+                  />
+                )}
+              </div>
+              <div className="p-6 space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h2 className="text-2xl font-bold">{selectedVideo.title}</h2>
+                    {selectedVideo.episode_number && (
+                      <p className="text-sm text-muted-foreground mt-1">Серия {selectedVideo.episode_number}</p>
+                    )}
+                  </div>
+                  {selectedVideo.anime_series && (
+                    <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap">
+                      {selectedVideo.anime_series === 'Gachiakuta' && '🔥 Гачиакута'}
+                      {selectedVideo.anime_series === 'Windbreaker' && '💨 Ветролом'}
+                      {selectedVideo.anime_series === 'Berserk' && '⚔️ Берсерк'}
+                    </div>
+                  )}
+                </div>
+                {selectedVideo.description && (
+                  <p className="text-sm text-muted-foreground">{selectedVideo.description}</p>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
         <DialogContent className="sm:max-w-[400px]">
           <DialogHeader>
@@ -563,6 +611,10 @@ const Index = () => {
                   key={video.id} 
                   className="group overflow-hidden hover-scale cursor-pointer animate-fade-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
+                  onClick={() => {
+                    setSelectedVideo(video);
+                    setIsPlayerOpen(true);
+                  }}
                 >
                   <div className="relative h-48 overflow-hidden bg-muted">
                     {video.thumbnail_url ? (
@@ -599,11 +651,17 @@ const Index = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full group" asChild>
-                      <a href={video.video_url} target="_blank" rel="noopener noreferrer">
-                        <Icon name="ExternalLink" className="mr-2" size={16} />
-                        Смотреть
-                      </a>
+                    <Button 
+                      variant="default" 
+                      className="w-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedVideo(video);
+                        setIsPlayerOpen(true);
+                      }}
+                    >
+                      <Icon name="Play" className="mr-2" size={16} />
+                      Смотреть
                     </Button>
                     <Button 
                       variant="destructive" 
