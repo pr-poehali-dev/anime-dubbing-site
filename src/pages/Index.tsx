@@ -466,7 +466,7 @@ const Index = () => {
                         <input
                           type="file"
                           id="video_file"
-                          accept="video/*"
+                          accept="video/*,.mov,.MOV"
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
