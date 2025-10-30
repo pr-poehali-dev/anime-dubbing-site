@@ -120,35 +120,18 @@ const Index = () => {
   };
 
   const uploadFile = async (file: File): Promise<string> => {
+    const MAX_FILE_SIZE = 100 * 1024 * 1024;
+    
+    if (file.size > MAX_FILE_SIZE) {
+      throw new Error(`Файл слишком большой (${(file.size / 1024 / 1024).toFixed(1)}МБ). Максимум: ${MAX_FILE_SIZE / 1024 / 1024}МБ. Для больших видео используйте YouTube, VK или Rutube`);
+    }
+
     const reader = new FileReader();
     return new Promise((resolve, reject) => {
-      reader.onload = async () => {
-        try {
-          const base64Data = reader.result as string;
-          
-          const response = await fetch(UPLOAD_API_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              file: base64Data,
-              fileName: file.name,
-              fileType: file.type
-            })
-          });
-
-          if (!response.ok) {
-            throw new Error('Upload failed');
-          }
-
-          const data = await response.json();
-          resolve(data.url);
-        } catch (error) {
-          reject(error);
-        }
+      reader.onload = () => {
+        resolve(reader.result as string);
       };
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error('Ошибка чтения файла'));
       reader.readAsDataURL(file);
     });
   };
@@ -493,6 +476,12 @@ const Index = () => {
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
+                              const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+                              toast({ 
+                                title: 'Загрузка началась', 
+                                description: `Загружаем ${fileSizeMB}МБ, это может занять время...` 
+                              });
+                              
                               setIsUploadingVideo(true);
                               try {
                                 const url = await uploadFile(file);
@@ -501,10 +490,11 @@ const Index = () => {
                                   title: 'Видео загружено!', 
                                   description: 'Файл успешно загружен в облако' 
                                 });
-                              } catch (error) {
+                              } catch (error: any) {
+                                console.error('Upload error:', error);
                                 toast({ 
                                   title: 'Ошибка загрузки', 
-                                  description: 'Не удалось загрузить видео',
+                                  description: error?.message || 'Не удалось загрузить видео',
                                   variant: 'destructive'
                                 });
                               } finally {

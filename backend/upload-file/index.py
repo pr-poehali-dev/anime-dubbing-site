@@ -59,7 +59,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         file_extension = file_name.split('.')[-1] if '.' in file_name else 'mp4'
         unique_filename = f"{uuid.uuid4()}.{file_extension}"
         
-        upload_url = 'https://api.poehali.dev/storage/upload'
+        upload_url = 'https://cdn.poehali.dev/upload'
         
         boundary = f"----WebKitFormBoundary{uuid.uuid4().hex[:16]}"
         body = []
@@ -83,7 +83,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             method='POST'
         )
         
-        with urllib.request.urlopen(req, timeout=300) as response:
+        with urllib.request.urlopen(req, timeout=600) as response:
             response_data = json.loads(response.read().decode())
             file_url = response_data.get('url', f"https://cdn.poehali.dev/files/{unique_filename}")
         
