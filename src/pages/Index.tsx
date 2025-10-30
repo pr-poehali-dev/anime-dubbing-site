@@ -32,8 +32,11 @@ const Index = () => {
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isNewsDialogOpen, setIsNewsDialogOpen] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSeries, setSelectedSeries] = useState<string>('all');
+  const [adminPassword, setAdminPassword] = useState<string>('');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     title: '',
@@ -81,11 +84,18 @@ const Index = () => {
     if (!confirm(`Удалить "${videoTitle}"?`)) return;
 
     try {
-      const response = await fetch(`${API_URL}?id=${videoId}`, {
+      const response = await fetch(`${API_URL}?id=${videoId}&password=${encodeURIComponent(adminPassword)}`, {
         method: 'DELETE',
       });
 
-      if (response.ok) {
+      if (response.status === 403) {
+        toast({
+          title: 'Неверный пароль',
+          description: 'Введите правильный пароль администратора',
+          variant: 'destructive',
+        });
+        setIsPasswordDialogOpen(true);
+      } else if (response.ok) {
         toast({
           title: 'Видео удалено',
           description: 'Озвучка успешно удалена',
@@ -114,16 +124,25 @@ const Index = () => {
         body: JSON.stringify({
           ...formData,
           episode_number: parseInt(formData.episode_number) || null,
-          anime_series: formData.anime_series
+          anime_series: formData.anime_series,
+          admin_password: adminPassword
         }),
       });
 
-      if (response.ok) {
+      if (response.status === 403) {
+        toast({
+          title: 'Неверный пароль',
+          description: 'Введите правильный пароль администратора',
+          variant: 'destructive',
+        });
+        setIsPasswordDialogOpen(true);
+      } else if (response.ok) {
         toast({
           title: 'Видео добавлено!',
           description: 'Ваша озвучка успешно загружена',
         });
         setIsDialogOpen(false);
+        setIsAuthenticated(true);
         setFormData({
           title: '',
           description: '',
@@ -155,15 +174,26 @@ const Index = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newsFormData),
+        body: JSON.stringify({
+          ...newsFormData,
+          admin_password: adminPassword
+        }),
       });
 
-      if (response.ok) {
+      if (response.status === 403) {
+        toast({
+          title: 'Неверный пароль',
+          description: 'Введите правильный пароль администратора',
+          variant: 'destructive',
+        });
+        setIsPasswordDialogOpen(true);
+      } else if (response.ok) {
         toast({
           title: 'Новость опубликована!',
           description: 'Ваша новость успешно добавлена',
         });
         setIsNewsDialogOpen(false);
+        setIsAuthenticated(true);
         setNewsFormData({
           title: '',
           content: '',
@@ -186,11 +216,18 @@ const Index = () => {
     if (!confirm(`Удалить новость "${newsTitle}"?`)) return;
 
     try {
-      const response = await fetch(`${NEWS_API_URL}?id=${newsId}`, {
+      const response = await fetch(`${NEWS_API_URL}?id=${newsId}&password=${encodeURIComponent(adminPassword)}`, {
         method: 'DELETE',
       });
 
-      if (response.ok) {
+      if (response.status === 403) {
+        toast({
+          title: 'Неверный пароль',
+          description: 'Введите правильный пароль администратора',
+          variant: 'destructive',
+        });
+        setIsPasswordDialogOpen(true);
+      } else if (response.ok) {
         toast({
           title: 'Новость удалена',
           description: 'Новость успешно удалена',
@@ -208,6 +245,44 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>🔒 Вход для администратора</DialogTitle>
+            <DialogDescription>
+              Введите пароль для загрузки видео и новостей
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="admin_password">Пароль администратора</Label>
+              <Input
+                id="admin_password"
+                type="password"
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="Введите пароль"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setIsPasswordDialogOpen(false);
+                    setIsAuthenticated(true);
+                  }
+                }}
+              />
+            </div>
+            <Button 
+              className="w-full" 
+              onClick={() => {
+                setIsPasswordDialogOpen(false);
+                setIsAuthenticated(true);
+              }}
+            >
+              Войти
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div 
         className="relative h-[70vh] flex items-center justify-center overflow-hidden"
         style={{
@@ -232,7 +307,17 @@ const Index = () => {
             </Button>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="lg" variant="outline" className="hover-scale">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="hover-scale"
+                  onClick={() => {
+                    if (!adminPassword) {
+                      setIsPasswordDialogOpen(true);
+                      return;
+                    }
+                  }}
+                >
                   <Icon name="Upload" className="mr-2" size={20} />
                   Загрузить видео
                 </Button>

@@ -13,14 +13,15 @@
       "body": {
         "title": "Новый сезон Гачиакута",
         "content": "Скоро выйдет второй сезон!",
-        "image_url": "https://example.com/news.jpg"
+        "image_url": "https://example.com/news.jpg",
+        "admin_password": "test"
       },
       "expectedStatus": 201
     },
     {
       "name": "Delete article",
       "method": "DELETE",
-      "path": "/?id=999",
+      "path": "/?id=999&password=test",
       "expectedStatus": 200
     }
   ]

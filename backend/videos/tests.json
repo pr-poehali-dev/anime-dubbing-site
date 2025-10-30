@@ -16,14 +16,15 @@
         "video_url": "https://example.com/video3.mp4",
         "thumbnail_url": "https://example.com/thumb3.jpg",
         "episode_number": 3,
-        "anime_series": "Gachiakuta"
+        "anime_series": "Gachiakuta",
+        "admin_password": "test"
       },
       "expectedStatus": 201
     },
     {
       "name": "Delete video",
       "method": "DELETE",
-      "path": "/?id=999",
+      "path": "/?id=999&password=test",
       "expectedStatus": 200
     }
   ]
