@@ -19,9 +19,19 @@ interface AnimeVideo {
   created_at: string;
 }
 
+interface NewsArticle {
+  id: number;
+  title: string;
+  content: string;
+  image_url?: string;
+  created_at: string;
+}
+
 const Index = () => {
   const [videos, setVideos] = useState<AnimeVideo[]>([]);
+  const [news, setNews] = useState<NewsArticle[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isNewsDialogOpen, setIsNewsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSeries, setSelectedSeries] = useState<string>('all');
   const { toast } = useToast();
@@ -33,11 +43,18 @@ const Index = () => {
     episode_number: '',
     anime_series: 'Gachiakuta'
   });
+  const [newsFormData, setNewsFormData] = useState({
+    title: '',
+    content: '',
+    image_url: ''
+  });
 
   const API_URL = 'https://functions.poehali.dev/ad1562f4-2b61-41af-a479-3f6f0447adfd';
+  const NEWS_API_URL = 'https://functions.poehali.dev/3c6ea050-fc9a-4302-a957-f39e021872ff';
 
   useEffect(() => {
     fetchVideos();
+    fetchNews();
   }, []);
 
   const fetchVideos = async () => {
@@ -47,6 +64,16 @@ const Index = () => {
       setVideos(data.videos || []);
     } catch (error) {
       console.error('Error fetching videos:', error);
+    }
+  };
+
+  const fetchNews = async () => {
+    try {
+      const response = await fetch(NEWS_API_URL);
+      const data = await response.json();
+      setNews(data.news || []);
+    } catch (error) {
+      console.error('Error fetching news:', error);
     }
   };
 
@@ -115,6 +142,67 @@ const Index = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleNewsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(NEWS_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newsFormData),
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Новость опубликована!',
+          description: 'Ваша новость успешно добавлена',
+        });
+        setIsNewsDialogOpen(false);
+        setNewsFormData({
+          title: '',
+          content: '',
+          image_url: ''
+        });
+        fetchNews();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось опубликовать новость',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteNews = async (newsId: number, newsTitle: string) => {
+    if (!confirm(`Удалить новость "${newsTitle}"?`)) return;
+
+    try {
+      const response = await fetch(`${NEWS_API_URL}?id=${newsId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Новость удалена',
+          description: 'Новость успешно удалена',
+        });
+        fetchNews();
+      }
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось удалить новость',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -341,6 +429,118 @@ const Index = () => {
       </section>
 
       <section className="py-20 px-4 bg-card/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h2 className="text-4xl font-bold mb-2">Новости</h2>
+              <p className="text-muted-foreground">Последние обновления и анонсы</p>
+            </div>
+            <Dialog open={isNewsDialogOpen} onOpenChange={setIsNewsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="hover-scale">
+                  <Icon name="Plus" className="mr-2" size={20} />
+                  Добавить новость
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Опубликовать новость</DialogTitle>
+                  <DialogDescription>
+                    Добавьте новость или анонс для ваших подписчиков
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleNewsSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="news_title">Заголовок *</Label>
+                    <Input
+                      id="news_title"
+                      value={newsFormData.title}
+                      onChange={(e) => setNewsFormData({...newsFormData, title: e.target.value})}
+                      placeholder="Например: Новый сезон Гачиакута"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="news_content">Текст новости *</Label>
+                    <Textarea
+                      id="news_content"
+                      value={newsFormData.content}
+                      onChange={(e) => setNewsFormData({...newsFormData, content: e.target.value})}
+                      placeholder="Расскажите о новости подробнее..."
+                      rows={6}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="news_image">Ссылка на изображение</Label>
+                    <Input
+                      id="news_image"
+                      value={newsFormData.image_url}
+                      onChange={(e) => setNewsFormData({...newsFormData, image_url: e.target.value})}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading ? 'Публикация...' : 'Опубликовать'}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {news.length === 0 ? (
+            <div className="text-center py-20">
+              <Icon name="Newspaper" size={64} className="mx-auto mb-4 text-muted-foreground" />
+              <p className="text-xl text-muted-foreground">Пока нет новостей</p>
+              <p className="text-sm text-muted-foreground mt-2">Нажмите "Добавить новость" чтобы опубликовать первую новость</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {news.map((article, index) => (
+                <Card 
+                  key={article.id} 
+                  className="overflow-hidden hover-scale animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  {article.image_url && (
+                    <div className="relative h-48 overflow-hidden bg-muted">
+                      <img 
+                        src={article.image_url} 
+                        alt={article.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle>{article.title}</CardTitle>
+                    <CardDescription className="text-xs">
+                      {new Date(article.created_at).toLocaleDateString('ru-RU', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-foreground whitespace-pre-wrap">{article.content}</p>
+                    <Button 
+                      variant="destructive" 
+                      className="w-full" 
+                      size="sm"
+                      onClick={() => handleDeleteNews(article.id, article.title)}
+                    >
+                      <Icon name="Trash2" className="mr-2" size={16} />
+                      Удалить новость
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-6">Контакты</h2>
           <p className="text-muted-foreground mb-8 text-lg">

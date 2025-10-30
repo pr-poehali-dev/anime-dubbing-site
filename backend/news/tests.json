@@ -1,0 +1,27 @@
+{
+  "tests": [
+    {
+      "name": "Get all news",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Add new article",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "title": "Новый сезон Гачиакута",
+        "content": "Скоро выйдет второй сезон!",
+        "image_url": "https://example.com/news.jpg"
+      },
+      "expectedStatus": 201
+    },
+    {
+      "name": "Delete article",
+      "method": "DELETE",
+      "path": "/?id=999",
+      "expectedStatus": 200
+    }
+  ]
+}
