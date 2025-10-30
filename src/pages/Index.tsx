@@ -295,11 +295,13 @@ const Index = () => {
         
         <div className="relative z-10 text-center px-4 animate-fade-in">
           <div className="flex justify-center mb-6">
-            <img 
-              src="https://cdn.poehali.dev/files/cc9d35eb-66ff-4c0c-a516-63911cb83945.jpg" 
-              alt="BebraDub Logo" 
-              className="w-64 h-64 object-cover rounded-2xl shadow-2xl border-4 border-primary/20"
-            />
+            <a href="#" className="hover:opacity-80 transition-opacity">
+              <img 
+                src="https://cdn.poehali.dev/files/3df2d6ee-0972-4457-8b17-abe5ce5858b2.jpg" 
+                alt="BebraDub Logo" 
+                className="w-64 h-64 object-cover rounded-2xl shadow-2xl border-4 border-primary/20 cursor-pointer"
+              />
+            </a>
           </div>
           <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
             BebraDub
